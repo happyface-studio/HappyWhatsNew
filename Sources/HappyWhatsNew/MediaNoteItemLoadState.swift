@@ -1,6 +1,6 @@
 //
 //  MediaNoteItemLoadState.swift
-//  Notelet
+//  HappyWhatsNew
 //
 
 enum MediaNoteItemLoadState {
