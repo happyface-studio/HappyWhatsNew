@@ -1,6 +1,6 @@
 //
 //  NoteItemView.swift
-//  Notelet
+//  HappyWhatsNew
 //
 //  Created by Mykola Harmash on 05.05.26.
 //

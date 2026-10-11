@@ -1,30 +1,26 @@
-<p align="center">
-  <img src="Assets/logo.png" alt="Notelet logo" width="84" height="84" />
-</p>
+# HappyWhatsNew
 
-<h3 align="center">Notelet</h3>
+> A HappyFace Studio fork of [Notelet](https://github.com/mykolaharmash/notelet) by Mykola Harmash, released under the MIT License. The module is renamed to `HappyWhatsNew`; the public API keeps its `Notelet…` names so upstream fixes merge cleanly.
 
-<p align="center">SwiftUI package for showing rich release notes in iOS apps</p>
-
-<p align="center">
-    <img src="https://img.shields.io/badge/iOS-17.0+-2980b9.svg" />
-    <img src="https://img.shields.io/badge/iPadOS-17.0+-8e44ad.svg" />
-</p>
+SwiftUI package for showing rich release notes in iOS apps (iOS / iPadOS 17+).
 
 <p align="center">
   <video src="https://github.com/user-attachments/assets/dd636105-82bb-4fd2-8d5a-ada9e9e4c38c" controls muted playsinline height="600px" width="auto"></video>
 </p>
 
-> [!TIP]
-> Once you're done here, check my other project [AppView](https://appview.dev) to get an optimized website for your app. It will boost downloads coming from web search and AI suggestions.
-
 ## Installation (Swift Package Manager)
 
 1. In Xcode, open your app project.
 2. Go to **File → Add Package Dependencies...**.
-3. Enter the repo URL https://github.com/mykolaharmash/notelet into the search.
+3. Enter the repo URL https://github.com/happyface-studio/HappyWhatsNew into the search.
 4. Click on "Add package".
-5. Add `Notelet` to your app target.
+5. Add `HappyWhatsNew` to your app target.
+
+Or in `Package.swift`:
+
+```swift
+.package(url: "https://github.com/happyface-studio/HappyWhatsNew.git", from: "2.0.0")
+```
 
 
 ## Usage
@@ -33,8 +29,7 @@ Here is a full usage example with comments to get started quickly. Below are mor
 
 ```swift
 import SwiftUI
-// Import Notelet
-import Notelet
+import HappyWhatsNew
 
 /**
 * Release notes for different versions of the app.
@@ -120,12 +115,14 @@ The most common use case is to show release notes for the latest app update. Att
 )
 ```
 
-Notelet will automatically get the current app version from the bundle and show release notes. When the user dismisses the sheet, it will mark the current version as seen, so the user doesn't see the same release notes again.
+HappyWhatsNew will automatically get the current app version from the bundle and show release notes. When the user dismisses the sheet, it will mark the current version as seen, so the user doesn't see the same release notes again.
 
 > [!IMPORTANT]
-> Notelet reads the current app version from your app bundle, specifically the `CFBundleShortVersionString` property. It's the version you see in Xcode inside the "General" tab for a target. Make sure to use this app version when adding it to the `notes` list; it might be different from the version you have in App Store Connect.
+> HappyWhatsNew reads the current app version from your app bundle, specifically the `CFBundleShortVersionString` property. It's the version you see in Xcode inside the "General" tab for a target. Make sure to use this app version when adding it to the `notes` list; it might be different from the version you have in App Store Connect.
 
-When specifying version directly as `version: .current`, the release notes sheet will appear automatically when the view hierarchy renders. You can also trigger the sheet manually via a State property.
+When specifying version directly as `version: .current`, the release notes sheet will appear automatically when the view hierarchy renders, once per app version.
+
+To show release notes on demand — for example from a "What's new" button — pass a **binding** instead. Setting it presents the sheet (even if that version was already seen), and it is reset to `nil` on dismiss, so the button works every time.
 
 ```swift
 struct ContentView: View {
@@ -135,27 +132,28 @@ struct ContentView: View {
         VStack {
             Text("Hello, world!")
 
-            Button("Show Release Notes") {
+            Button("What's new") {
                 presentedVersion = .current
             }
         }
         .noteletSheet(
             notes: notes,
-            version: presentedVersion
+            version: $presentedVersion
         )
     }
 }
 ```
+
+> [!NOTE]
+> Passing the state as a plain value (`version: presentedVersion`) keeps the automatic rules: `.current` is skipped once it has been seen, and setting the same value again does nothing. Use the binding for buttons.
 
 ## Manually show notes for a specific version
 
 You may also want to show release notes for app versions other than the current one, for example, to give users access to a historical changelog in app settings.
 
 ```swift
- .noteletSheet(
-    notes: notes,
-    version: .v("1.2.1")
-)
+Button("Changes in 1.2.1") { presentedVersion = .v("1.2.1") }
+    .noteletSheet(notes: notes, version: $presentedVersion)
 ```
 
 ## Defining release notes
@@ -301,7 +299,7 @@ let RELEASE_NOTES: [NoteletVersionNotes] = [
 
 ## Latest viewed version storage
 
-When using `version: .current`, Notelet automatically marks the current version as seen by saving it to `UserDefaults`.
+When using `version: .current`, HappyWhatsNew automatically marks the current version as seen by saving it to `UserDefaults`.
 
 In some cases, you might also want to save it manually. For example, I don't want new users to see the release notes sheet right after onboarding, so when onboarding is done, I manually mark the current version as seen, and they only see release notes on the next update.
 
@@ -314,3 +312,13 @@ For debugging purposes, you might also want to reset the storage value:
 ```swift
 NoteletStorage.resetSeenVersion()
 ```
+
+The seen version is stored under the key `Notelet.LatestSeenAppVersion` (`NoteletStorageKey.latestSeenAppVersion`), unchanged from upstream, so switching an app from Notelet to HappyWhatsNew doesn't show already-seen notes again.
+
+## Migrating from Notelet
+
+Replace the package URL with `https://github.com/happyface-studio/HappyWhatsNew` and `import Notelet` with `import HappyWhatsNew`. Nothing else changes: types, modifiers and storage keys are the same.
+
+## License
+
+MIT — see [LICENSE](LICENSE). Derived from [Notelet](https://github.com/mykolaharmash/notelet), Copyright (c) 2026 Mykola Harmash.
